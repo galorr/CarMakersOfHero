@@ -6,9 +6,8 @@ class Sender(object):
     socket = context.socket(zmq.PUB)
     
     def __init__(self):     
-        #self.socket.bind("tcp://*:%s" % self.port)
-        self.socket.connect("tcp://localhost:%s" % self.port)
+        self.socket.bind("tcp://*:%s" % self.port)
 
-    def send(self,message):
-        print('sender message - %s' % message)
+    def send(self,message):      
         self.socket.send_string(message)
+        print('sender message - %s' % message)
