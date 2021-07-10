@@ -17,10 +17,9 @@ sender = Sender()
 ###########################################################################################
 
 ################################# LOAD UP A BASIC WINDOW #################################
-DISPLAY_W, DISPLAY_H = 300, 100
+DISPLAY_W, DISPLAY_H = 300, 50
 canvas = pygame.Surface((DISPLAY_W,DISPLAY_H))
-window = pygame.display.set_mode(((DISPLAY_W,DISPLAY_H)))
-player = pygame.Rect(DISPLAY_W/2, DISPLAY_H/2, 60,60)
+window = pygame.display.set_mode((DISPLAY_W,DISPLAY_H))
 fontsize = 15
 myfont = pygame.font.SysFont("times", fontsize)
 gear = 'low'
@@ -46,7 +45,7 @@ for commandType in CommandType:
 
 # START OF GAME LOOP
 while running:
-    ################################# CHECK PLAYER INPUT #################################
+    ################################# CHECK JOYSTICK INPUT #################################
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -97,11 +96,13 @@ while running:
     ################################# UPDATE WINDOW AND DISPLAY #################################
     # render text  
     canvas.fill((255,255,255))
-    window.blit(canvas, (0,0))    
+    window.blit(canvas, (0,0)) 
+    # Differential Label 
     differentialLabel = myfont.render('differential - %s' % differential, 1, (0,0,0))
+    window.blit(differentialLabel,(5,0))
+    # Gear Label
     gearLabel = myfont.render('gear - %s' % gear, 1, (0,0,0))
-    window.blit(differentialLabel,(0,0))
-    window.blit(gearLabel,(0,(fontsize)+(5)))
+    window.blit(gearLabel,(5,(fontsize)+(5)))
 
     # Send command to RaspberryPy
     for commandType in CommandType: 
