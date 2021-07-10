@@ -3,5 +3,8 @@ class Command:
         self.type = type
         self.value = value
 
-    def toString(self):
-        return "{" + f"command: {self.type}, value: {self.value}" + "}"
+    def equal(self, command):
+        if command == None:
+            return self == None
+        else:
+            return self.type == command.type and self.value == command.value

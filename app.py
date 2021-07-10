@@ -1,7 +1,6 @@
 from hashlib import new
 import pygame
 import json
-import zmq
 from command import Command
 from enums import ButtonKey
 from enums import CommandType
@@ -12,7 +11,8 @@ pygame.init()
 pygame.font.init()
 running = True
 clock = pygame.time.Clock()
-command = None
+commandDictionary = {}
+oldCommandDictionary = {}
 sender = Sender()
 ###########################################################################################
 
@@ -39,6 +39,11 @@ for joystick in joysticks:
 # 3: Right Analog Vertical 4: Left Trigger, 5: Right Trigger
 analog_keys = {0:0, 1:0, 2:0, 3:0, 4:-1, 5: -1 }
 
+# Initialize command dictionary
+for commandType in CommandType:
+    commandDictionary[commandType] = None
+    oldCommandDictionary[commandType] = None
+
 # START OF GAME LOOP
 while running:
     ################################# CHECK PLAYER INPUT #################################
@@ -49,58 +54,45 @@ while running:
             ############### UPDATE SPRITE IF SPACE IS PRESSED #################################
             pass
 
-        command = None
-
-        # HANDLES BUTTON PRESSES
-        if event.type == pygame.JOYBUTTONDOWN:
-            if event.button == ButtonKey.square.value:
-                command = Command(CommandType.lock.value, 1000)
-                differential = 'open'
-            if event.button == ButtonKey.circle.value:
-                command = Command(CommandType.lock.value, 2000)
-                differential = 'lock'
-            if event.button == ButtonKey.x.value:
-                command = Command(CommandType.gear.value, 1000)
-                gear = 'low'
-            if event.button == ButtonKey.triangle.value:
-                command = Command(CommandType.gear.value, 2000)
-                gear = 'high'
         # HANDLES BUTTON RELEASES
         if event.type == pygame.JOYBUTTONUP:
             if event.button == ButtonKey.square.value:
-                command = Command(CommandType.lock.value, 1500)
+                commandDictionary[CommandType.lock] = Command(CommandType.lock.value, 1000)
+                differential = 'open'
             if event.button == ButtonKey.circle.value:
-                command = Command(CommandType.lock.value, 1500)
+                commandDictionary[CommandType.lock] = Command(CommandType.lock.value, 2000)
+                differential = 'lock'
             if event.button == ButtonKey.x.value:
-                command = Command(CommandType.gear.value, 1500)
+                commandDictionary[CommandType.gear] = Command(CommandType.gear.value, 1000)
+                gear = 'low'
             if event.button == ButtonKey.triangle.value:
-                command = Command(CommandType.gear.value, 1500)
+                commandDictionary[CommandType.gear] = Command(CommandType.gear.value, 2000)
+                gear = 'high'
 
         #HANDLES ANALOG INPUTS
-        if event.type == pygame.JOYAXISMOTION:    
-            # command = Command(CommandType.steering.value, 1500)       
+        if event.type == pygame.JOYAXISMOTION:         
             analog_keys[event.axis] = event.value
-           
+            
             if abs(analog_keys[0]) > .4 or abs(analog_keys[2]) > .4:
                  # Left Horizontal Analog
-                if analog_keys[0] < -.4:
-                    command = Command(CommandType.steering.value, 1500 + 500 * analog_keys[0])
-                if analog_keys[0] > .4:
-                    command = Command(CommandType.steering.value, 1500 + 500 * analog_keys[0])
-
+                if abs(analog_keys[0]) > .4:
+                    commandDictionary[CommandType.steering] = Command(CommandType.steering.value, (analog_keys[0] + 3) * 500)
                 # Right Horizontal Analog
-                if analog_keys[2] < -.4:
-                    command = Command(CommandType.steering.value, 1500 + 500 * analog_keys[2])
-                if analog_keys[2] > .4:
-                    command = Command(CommandType.steering.value, 1500 + 500 * analog_keys[2])
+                if abs(analog_keys[2]) > .4:
+                    commandDictionary[CommandType.steering] = Command(CommandType.steering.value, (analog_keys[2] + 3) * 500)
             else:
-                command = Command(CommandType.steering.value, 1500)
+                if event.axis == 0 or event.axis == 2:
+                    commandDictionary[CommandType.steering] = Command(CommandType.steering.value, 1500)
 
             # Triggers
-            if analog_keys[4] >= 0:  # Left trigger
-                command = Command(CommandType.throttle.value, 1500 - 500 * analog_keys[4])               
-            if analog_keys[5] >= 0:  # Right Trigger
-                command = Command(CommandType.throttle.value, 1500 + 500 * analog_keys[5])
+            if analog_keys[4] >= 0 or analog_keys[5] >= 0:
+                if analog_keys[4] >= 0:  # Left trigger
+                    commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1500 - 500 * analog_keys[4])               
+                if analog_keys[5] >= 0:  # Right Trigger
+                    commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1500 + 500 * analog_keys[5])
+            else:
+                if event.axis == 4 or event.axis == 5:
+                    commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1500)
 
     ################################# UPDATE WINDOW AND DISPLAY #################################
     # render text  
@@ -109,16 +101,14 @@ while running:
     differentialLabel = myfont.render('differential - %s' % differential, 1, (0,0,0))
     gearLabel = myfont.render('gear - %s' % gear, 1, (0,0,0))
     window.blit(differentialLabel,(0,0))
-    window.blit(gearLabel,(0,(1*fontsize)+(5*1)))
-    if command != None:
-        commandLabel = myfont.render(command.toString(), 1, (0,0,0))
-        window.blit(commandLabel,(0,(2*fontsize)+(15*2)))  
-    pygame.display.update()
+    window.blit(gearLabel,(0,(fontsize)+(5)))
 
     # Send command to RaspberryPy
-    if command != None:
-        message = json.dumps(command.__dict__)
-        #socket.send(b'message')
-        sender.send(message=message)
-
+    for commandType in CommandType: 
+        if commandDictionary[commandType] != None:
+            if not commandDictionary[commandType].equal(oldCommandDictionary[commandType]):
+                oldCommandDictionary[commandType] = commandDictionary[commandType]
+                message = json.dumps(commandDictionary[commandType].__dict__)
+                sender.send(message=message)
+    pygame.display.update()
     clock.tick(60)
