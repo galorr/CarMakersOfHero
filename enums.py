@@ -18,7 +18,7 @@ class ButtonKey(Enum):
     touchpad = 15
 
 class CommandType(Enum):
-    lock = "lock"
+    differentialFront = "differentialFront"
+    differentialRear = "differentialRear"
     steering = "steering"
-    gear = "gear"
     throttle = "throttle"

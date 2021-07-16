@@ -17,13 +17,16 @@ sender = Sender()
 ###########################################################################################
 
 ################################# LOAD UP A BASIC WINDOW #################################
-DISPLAY_W, DISPLAY_H = 300, 50
+DISPLAY_W, DISPLAY_H = 300, 60
 canvas = pygame.Surface((DISPLAY_W,DISPLAY_H))
 window = pygame.display.set_mode((DISPLAY_W,DISPLAY_H))
 fontsize = 15
 myfont = pygame.font.SysFont("times", fontsize)
-gear = 'low'
-differential = 'open'
+OPEN = 'open'
+LOCK = 'lock'
+differentialFront = OPEN
+differentialRear = OPEN
+backSlowly = 'on'
 ###########################################################################################
 
 
@@ -34,7 +37,7 @@ for i in range(pygame.joystick.get_count()):
 for joystick in joysticks:
     joystick.init()
 
-# 0: Left analog horizonal, 1: Left Analog Vertical, 2: Right Analog Horizontal
+# 0: Left analog horizontal, 1: Left Analog Vertical, 2: Right Analog Horizontal
 # 3: Right Analog Vertical 4: Left Trigger, 5: Right Trigger
 analog_keys = {0:0, 1:0, 2:0, 3:0, 4:-1, 5: -1 }
 
@@ -56,17 +59,23 @@ while running:
         # HANDLES BUTTON RELEASES
         if event.type == pygame.JOYBUTTONUP:
             if event.button == ButtonKey.square.value:
-                commandDictionary[CommandType.lock] = Command(CommandType.lock.value, 1000)
-                differential = 'open'
+                commandDictionary[CommandType.differentialFront] = Command(CommandType.differentialFront.value, 1000)
+                differentialFront = OPEN
             if event.button == ButtonKey.circle.value:
-                commandDictionary[CommandType.lock] = Command(CommandType.lock.value, 2000)
-                differential = 'lock'
+                commandDictionary[CommandType.differentialFront] = Command(CommandType.differentialFront.value, 2000)
+                differentialFront = LOCK
             if event.button == ButtonKey.x.value:
-                commandDictionary[CommandType.gear] = Command(CommandType.gear.value, 1000)
-                gear = 'low'
+                commandDictionary[CommandType.differentialRear] = Command(CommandType.differentialRear.value, 1000)
+                differentialRear = OPEN
             if event.button == ButtonKey.triangle.value:
-                commandDictionary[CommandType.gear] = Command(CommandType.gear.value, 2000)
-                gear = 'high'
+                commandDictionary[CommandType.differentialRear] = Command(CommandType.differentialRear.value, 2000)
+                differentialRear = LOCK
+            if event.button == ButtonKey.down_arrow.value:
+                commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1400)
+                backSlowly = 'on'
+            if event.button == ButtonKey.up_arrow.value:
+                commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1500)
+                backSlowly = 'off'
 
         #HANDLES ANALOG INPUTS
         if event.type == pygame.JOYAXISMOTION:         
@@ -92,24 +101,48 @@ while running:
             else:
                 if event.axis == 4 or event.axis == 5:
                     commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1500)
+        else:
+        ############### Clean the Queue ###############
+            pass
 
     ################################# UPDATE WINDOW AND DISPLAY #################################
     # render text  
     canvas.fill((255,255,255))
     window.blit(canvas, (0,0)) 
-    # Differential Label 
-    differentialLabel = myfont.render('differential - %s' % differential, 1, (0,0,0))
-    window.blit(differentialLabel,(5,0))
-    # Gear Label
-    gearLabel = myfont.render('gear - %s' % gear, 1, (0,0,0))
-    window.blit(gearLabel,(5,(fontsize)+(5)))
-
+    # Front differential Label 
+    differentialFrontLabel = myfont.render('Front differential - %s' % differentialFront, 1, (0,0,0))
+    window.blit(differentialFrontLabel,(5,0))
+    # Rear differential Label 
+    differentialRearLabel = myfont.render('Rear differential - %s' % differentialRear, 1, (0,0,0))
+    window.blit(differentialRearLabel,(5,(fontsize)+(5)))
+    # Back slowly Label 
+    backSlowlyLabel = myfont.render('Back slowly - %s' % backSlowly, 1, (0,0,0))
+    window.blit(backSlowlyLabel,(5,(2*fontsize)+(10)))
     # Send command to RaspberryPy
     for commandType in CommandType: 
         if commandDictionary[commandType] != None:
-            if not commandDictionary[commandType].equal(oldCommandDictionary[commandType]):
-                oldCommandDictionary[commandType] = commandDictionary[commandType]
-                message = json.dumps(commandDictionary[commandType].__dict__)
-                sender.send(message=message)
+            if commandType == CommandType.throttle:
+                if oldCommandDictionary[commandType] != None:                  
+                    if commandDictionary[commandType].value == 1500 and oldCommandDictionary[commandType].value == 1500:
+                        # Do nothing
+                        pass
+                    else:
+                        message = json.dumps(commandDictionary[commandType].__dict__)
+                        sender.send(message=message)           
+                        if (commandDictionary[commandType].value > 1500 and oldCommandDictionary[commandType].value < 1500) or (oldCommandDictionary[commandType].value > 1500 and commandDictionary[commandType].value < 1500):
+                            command = Command(CommandType.throttle.value, 1500)
+                            message = json.dumps(command.__dict__)
+                            sender.send(message=message) 
+                        oldCommandDictionary[commandType] = commandDictionary[commandType]
+                else:
+                   oldCommandDictionary[commandType] = commandDictionary[commandType]
+                   message = json.dumps(commandDictionary[commandType].__dict__) 
+                   sender.send(message=message)     
+            else:
+                if not commandDictionary[commandType].equal(oldCommandDictionary[commandType]):
+                    oldCommandDictionary[commandType] = commandDictionary[commandType]
+                    message = json.dumps(commandDictionary[commandType].__dict__)
+                    sender.send(message=message)                              
+               
     pygame.display.update()
     clock.tick(60)
