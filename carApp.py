@@ -23,10 +23,10 @@ while running:
         command.initFromJson(messag)
         running = False # only for debug uses
         # Activate the car controlers
-        if command.type == CommandType.lock.value:
-            print('lock') # Send lock PWM command
-        if command.type == CommandType.gear.value:
-            print('gear') # Send lock PWM command
+        if command.type == CommandType.differentialRear.value:
+            print('lock/unlock rear') # Send lock PWM command
+        if command.type == CommandType.differentialFront.value:
+            print('lock/unlock front') # Send lock PWM command
         if command.type == CommandType.steering.value:
             print('steering') # Send lock PWM command
         if command.type == CommandType.throttle.value:
