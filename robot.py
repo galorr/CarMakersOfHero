@@ -8,6 +8,7 @@ from time import sleep
 # "differentialRear"
 # "steering"
 #  throttle"
+#
 class Robot:
     pin = 12
     freq = 50
@@ -40,14 +41,14 @@ class Robot:
             # Going straight - TBD
 
     def pwm_differentialFront(self,start):
-       self.pi_pwm.start(start)
+        self.pi_pwm.start(start)
         while True:
             print ("Robot front differential")
             sleep(1)
             # Going differential - TBD
 
     def pwm_differentialBack(self,start):
-       self.pi_pwm.start(start)
+        self.pi_pwm.start(start)
         while True:
             print ("Robot back differential")
             sleep(1)
@@ -65,6 +66,18 @@ class Robot:
         self.pi_pwm.start(start)
         while True:
             print ("Robot turns right")
+            sleep(1)
+
+    def pwm_throttle(self,start):
+        self.pi_pwm.start(start)
+        while True:
+            print ("Robot throttle")
+            sleep(1)
+
+    def pwm_lock(self,start):
+        self.pi_pwm.start(start)
+        while True:
+            print ("Robot stops")
             sleep(1)
     # Going right - TBD
     # pi_pwm = GPIO.PWM(pin, freq)

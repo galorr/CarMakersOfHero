@@ -28,12 +28,14 @@ while running:
         # Activate the car controlers
         if command.type == CommandType.lock.value:
             print('lock') # Send lock PWM command
-            pwm(35,50)
+            Robot.pwm_lock(35,50)
         if command.type == CommandType.gear.value:
             print('gear') # Send lock PWM command
         if command.type == CommandType.steering.value:
             print('steering') # Send lock PWM command
+            Robot.pwm_steering(35,50)
         if command.type == CommandType.throttle.value:
             print('throttle') # Send lock PWM command
+            Robot.pwm_throttle(35,50)
     except:
         print('Error getting messages from server')
