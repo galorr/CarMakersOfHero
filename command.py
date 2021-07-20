@@ -6,7 +6,8 @@ class Command:
         self.value = value
 
     def initFromJson(self, message):
-        self.__dict__ = json.loads(message)
+        self.__dict__ = json.dumps(message)
+        #self.__dict__ = json.loads(message)
 
     def equal(self, command):
         if command == None:
