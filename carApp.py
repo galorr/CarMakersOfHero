@@ -1,5 +1,8 @@
 import zmq
+import import RPi.GPIO as GPIO
+
 from command import Command
+from robot import Robot
 from enums import CommandType
 
 port = "5556"
@@ -25,6 +28,7 @@ while running:
         # Activate the car controlers
         if command.type == CommandType.lock.value:
             print('lock') # Send lock PWM command
+            pwm(35,50)
         if command.type == CommandType.gear.value:
             print('gear') # Send lock PWM command
         if command.type == CommandType.steering.value:

@@ -11,3 +11,5 @@ class Sender(object):
     def send(self,message):      
         self.socket.send_string(message)
         print('sender message - %s' % message) # For debug uses
+
+
