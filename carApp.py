@@ -1,4 +1,8 @@
 import zmq
+import RPi.GPIO as GPIO
+
+from time import sleep
+from robot import Robot
 from command import Command
 from enums import CommandType
 
@@ -20,16 +24,22 @@ while running:
     try:
         print("Collecting messages from server...") # For debug uses
         messag = socket.recv_string()
+        print(messag)
+        sleep(1)
         command.initFromJson(messag)
         running = False # only for debug uses
         # Activate the car controlers
         if command.type == CommandType.differentialRear.value:
             print('lock/unlock rear') # Send lock PWM command
+            Robot.pwm_differentialRear(35,50)
         if command.type == CommandType.differentialFront.value:
             print('lock/unlock front') # Send lock PWM command
+            Robot.pwm_differentialFront(35,50)
         if command.type == CommandType.steering.value:
             print('steering') # Send lock PWM command
+            Robot.pwm_steering(35,50)
         if command.type == CommandType.throttle.value:
             print('throttle') # Send lock PWM command
+            Robot.pwm_throttle(35,50)
     except:
         print('Error getting messages from server')
