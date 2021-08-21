@@ -1,0 +1,11 @@
+[Unit]
+Description=Start_rover
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/python/appCar.py
+StandartInput=tty-force
+
+[Install]
+WantedBy=multi-user.target

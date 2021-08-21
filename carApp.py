@@ -1,13 +1,13 @@
 import zmq
 from time import sleep
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 from command import Command
 from robot import Robot
 from enums import CommandType
 
 port = "5556"
-host = "*" # change to py host
+host = "192.168.1.35" # for debug the host is 127.0.0.1
 running = True
 command = Command('', '')
 
