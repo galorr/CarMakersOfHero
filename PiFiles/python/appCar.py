@@ -8,7 +8,7 @@ from command import Command
 from enums import CommandType
 
 port = "5556"
-host = "192.168.1.35" # change to py host
+host = "192.168.1.35" # for debug the host is 127.0.0.1
 running = True
 command = Command('', '')
 

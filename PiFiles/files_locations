@@ -1,2 +1,24 @@
-/usr/lib/systemd/system/roverApp.service
-/home/python/appCar.py
+### Setting new RPi
+1. run sudo apt install python3-pip
+2. run sudo pip install zmq
+3. run sudo pip install RPi.GPIO
+
+### PWM order
+pinSteering = 7 # steer right
+pinThrottle = 15 # throttle forword/backword
+pinDifferentialFront = 8 # differential front
+pinDifferentialBack = 16 # differential back
+
+### Fie that need to be copy into the RPi
+copy roverApp.service to /usr/lib/systemd/system/roverApp.service
+copy appCar.py to /home/python/appCar.py
+copy robot.py to /home/python/robot.py 
+copy command.py to /home/python/command.py 
+copy enums.py to /home/python/enums.py 
+
+
+## Setup startup service
+run this commands
+1. sudo systemctl daemon-reload
+2. sudo systemctl enable roverApp.service
+3. sudo systemctl start roverApp.service
