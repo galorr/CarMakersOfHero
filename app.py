@@ -22,10 +22,6 @@ canvas = pygame.Surface((DISPLAY_W,DISPLAY_H))
 window = pygame.display.set_mode((DISPLAY_W,DISPLAY_H))
 fontsize = 15
 myfont = pygame.font.SysFont("times", fontsize)
-OPEN = 'open'
-LOCK = 'lock'
-differentialFront = OPEN
-differentialRear = OPEN
 backSlowly = 'on'
 ###########################################################################################
 
@@ -58,18 +54,6 @@ while running:
 
         # HANDLES BUTTON RELEASES
         if event.type == pygame.JOYBUTTONUP:
-            if event.button == ButtonKey.square.value:
-                commandDictionary[CommandType.differentialFront] = Command(CommandType.differentialFront.value, 1000)
-                differentialFront = OPEN
-            if event.button == ButtonKey.circle.value:
-                commandDictionary[CommandType.differentialFront] = Command(CommandType.differentialFront.value, 2000)
-                differentialFront = LOCK
-            if event.button == ButtonKey.x.value:
-                commandDictionary[CommandType.differentialRear] = Command(CommandType.differentialRear.value, 1000)
-                differentialRear = OPEN
-            if event.button == ButtonKey.triangle.value:
-                commandDictionary[CommandType.differentialRear] = Command(CommandType.differentialRear.value, 2000)
-                differentialRear = LOCK
             if event.button == ButtonKey.down_arrow.value:
                 commandDictionary[CommandType.throttle] = Command(CommandType.throttle.value, 1400)
                 backSlowly = 'on'
@@ -109,12 +93,6 @@ while running:
     # render text  
     canvas.fill((255,255,255))
     window.blit(canvas, (0,0)) 
-    # Front differential Label 
-    differentialFrontLabel = myfont.render('Front differential - %s' % differentialFront, 1, (0,0,0))
-    window.blit(differentialFrontLabel,(5,0))
-    # Rear differential Label 
-    differentialRearLabel = myfont.render('Rear differential - %s' % differentialRear, 1, (0,0,0))
-    window.blit(differentialRearLabel,(5,(fontsize)+(5)))
     # Back slowly Label 
     backSlowlyLabel = myfont.render('Back slowly - %s' % backSlowly, 1, (0,0,0))
     window.blit(backSlowlyLabel,(5,(2*fontsize)+(10)))

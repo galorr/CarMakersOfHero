@@ -8,7 +8,7 @@ from command import Command
 from enums import CommandType
 
 port = "5556"
-host = "192.168.1.33" # for debug the host is 127.0.0.1
+host = "192.168.68.33" # for debug the host is 127.0.0.1
 running = True
 command = Command('', '')
 
@@ -30,12 +30,6 @@ while running:
         command.initFromJson(messag)
         running = False # only for debug uses
         # Activate the car controlers
-        if command.type == CommandType.differentialRear.value:
-            print('lock/unlock rear') # Send lock PWM command
-            Robot.pwm_differentialRear(35,50)
-        if command.type == CommandType.differentialFront.value:
-            print('lock/unlock front') # Send lock PWM command
-            Robot.pwm_differentialFront(35,50)
         if command.type == CommandType.steering.value:
             print('steering') # Send lock PWM command
             Robot.pwm_steering(35,50)
